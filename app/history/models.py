@@ -26,12 +26,8 @@ class ChatSession(Base):
 
     project = relationship("Project", back_populates="chat_sessions")
     messages = relationship("Message", back_populates="session", cascade="all, delete-orphan")
-    context_files = relationship(
-        "ContextFile", back_populates="session", cascade="all, delete-orphan"
-    )
-    prompt_attachments = relationship(
-        "SessionPromptAttachment", back_populates="session", cascade="all, delete-orphan"
-    )
+    context_files = relationship("ContextFile", back_populates="session", cascade="all, delete-orphan")
+    prompt_attachments = relationship("SessionPromptAttachment", back_populates="session", cascade="all, delete-orphan")
 
 
 class Message(Base):

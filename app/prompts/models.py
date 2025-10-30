@@ -1,7 +1,8 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.core.db import Base
+from app.prompts.enums import PromptType
 
 
 class Prompt(Base):
@@ -9,7 +10,9 @@ class Prompt(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    type = Column(Enum(PromptType), nullable=False)
     content = Column(Text, nullable=False)
+    source_path = Column(String, nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
 
     project = relationship("Project", back_populates="prompts")
