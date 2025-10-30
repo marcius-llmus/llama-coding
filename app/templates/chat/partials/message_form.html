@@ -1,0 +1,16 @@
+<form class="p-6 border-t border-dark-light bg-dark-lighter" onsubmit="sendMessage(event)">
+    <div class="relative">
+        <textarea
+            id="message-input"
+            rows="1"
+            class="w-full bg-dark-card border border-dark-light rounded-lg px-4 py-3 pr-14 resize-none text-gray-200"
+            placeholder="Ask me anything about your code..."
+            onkeydown="handleKeydown(event)"
+        ></textarea>
+        <button type="submit" class="absolute right-2 bottom-2 p-2 rounded-lg bg-primary hover:bg-primary-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        </button>
+    </div>
+</form>

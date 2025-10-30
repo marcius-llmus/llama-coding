@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex-1 flex flex-col overflow-hidden border-r border-dark-light">
+    {% include "chat/partials/message_list.html" %}
+
+    {% include "chat/partials/message_form.html" %}
+</div>
+{% endblock %}

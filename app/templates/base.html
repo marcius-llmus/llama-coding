@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llama Coding - AI Development Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/ws.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#8B5CF6',
+                        'primary-dark': '#7C3AED',
+                        'primary-light': '#A78BFA',
+                        'dark': '#0F0F0F',
+                        'dark-lighter': '#1A1A1A',
+                        'dark-light': '#262626',
+                        'dark-card': '#1F1F1F',
+                        'dark-darker': '#0A0A0A'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        #message-list pre {
+            -ms-overflow-style: auto !important;
+            scrollbar-width: auto !important;
+        }
+        #message-list pre::-webkit-scrollbar {
+            display: block !important;
+            width: 1px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1A1A1A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 4px;
+        }
+        textarea {
+            min-height: 44px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #8B5CF6;
+            outline: none;
+        }
+        .border-l-2 {
+            border-left-width: 3px !important;
+        }
+        .rounded-md {
+            border-radius: 0.1rem !important;
+        }
+        .tree-item-children {
+            max-height: 0;
+            overflow: hidden;
+        }
+        .tree-item.open > .tree-item-children {
+            max-height: 100%;
+        }
+        .tree-toggle.rotate-90 {
+            transform: rotate(90deg);
+        }
+        .file-tree-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .gradient-container-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .implicit-scroll-container {
+            overflow-y: auto;
+            height: 100%;
+            padding: 10px 0;
+        }
+        .modal-overlay {
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .cost-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+            cursor: help;
+        }
+        .usage-bar {
+            height: 6px;
+            background: #1A1A1A;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .usage-bar-fill {
+            height: 100%;
+            background: #8B5CF6;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-code-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            background: #262626;
+            border: 1px solid #1A1A1A;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #A78BFA;
+            cursor: pointer;
+        }
+        .copy-code-btn:hover {
+            background: #1A1A1A;
+        }
+        .prompt-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .prompt-tab.active {
+            border-bottom-color: #8B5CF6;
+            color: #8B5CF6;
+        }
+        .modal-scroll-content {
+            -ms-overflow-style: auto !important;
+            scrollbar-width: auto !important;
+            scrollbar-color: #594D73 #1A1A1A;
+        }
+        .modal-scroll-content::-webkit-scrollbar {
+            display: block !important;
+            width: 1px;
+        }
+        .modal-scroll-content::-webkit-scrollbar-track {
+            background: #1A1A1A;
+        }
+        .modal-scroll-content::-webkit-scrollbar-thumb {
+            background: #594D73;
+        }
+    </style>
+</head>
+<body class="bg-dark text-gray-200 min-h-screen flex">
+    
+    {% include "layout/sidebar.html" %}
+
+    <main class="flex-1 flex overflow-hidden bg-dark">
+        {% block content %}{% endblock %}
+        
+        {% include "layout/right_sidebar.html" %}
+    </main>
+
+    {% include "settings/partials/modal.html" %}
+    {% include "projects/partials/modal.html" %}
+    {% include "prompts/partials/modal.html" %}
+    {% include "context/partials/file_selection_modal.html" %}
+    {% include "history/partials/modal.html" %}
+
+    <script>
+        let sessionTokensInput = 0;
+        let sessionTokensOutput = 0;
+        let sessionCost = 0;
+        let cachedTokens = 0;
+        let monthlyCost = 12.45;
+        let messageCount = 0;
+        let filesCount = 0;
+        let currentPromptTab = 'global';
+
+        document.getElementById('session-start').textContent = new Date().toLocaleTimeString();
+        document.getElementById('monthly-cost').textContent = '$' + monthlyCost.toFixed(2);
+
+        function copyCode(button) {
+            const codeBlock = button.parentElement.querySelector('code');
+            const text = codeBlock.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                button.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy mr-1"></i> Copy';
+                }, 2000);
+            });
+        }
+
+        function switchPromptTab(tab, element) {
+            currentPromptTab = tab;
+            document.querySelectorAll('.prompt-tab').forEach(t => {
+                t.classList.remove('active');
+                t.classList.add('text-gray-500');
+                t.classList.remove('text-gray-300');
+            });
+            element.classList.add('active');
+            element.classList.remove('text-gray-500');
+            element.classList.add('text-gray-300');
+
+            const promptText = document.getElementById('new-prompt-text');
+            if (tab === 'global') {
+                document.getElementById('global-prompts').style.display = 'block';
+                document.getElementById('project-prompts').style.display = 'none';
+                promptText.textContent = 'New Global Prompt';
+            } else {
+                document.getElementById('global-prompts').style.display = 'none';
+                document.getElementById('project-prompts').style.display = 'block';
+                promptText.textContent = 'New Project Prompt';
+            }
+        }
+
+        function createNewPrompt() {
+            addLog(`Creating new ${currentPromptTab} prompt`, 'blue');
+        }
+
+        function clearHistory() {
+            addLog('History cleared', 'blue');
+            closeHistoryModal();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.add('active');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            addLog('Settings saved successfully', 'green');
+            closeSettingsModal();
+        }
+
+        function openProjectModal() {
+            document.getElementById('project-modal').classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('project-modal').classList.remove('active');
+        }
+
+        function openPromptModal() {
+            document.getElementById('prompt-modal').classList.add('active');
+        }
+
+        function closePromptModal() {
+            document.getElementById('prompt-modal').classList.remove('active');
+        }
+
+        function openFileSelectionModal() {
+            document.getElementById('file-selection-modal').classList.add('active');
+            initializeFileTree();
+        }
+
+        function closeFileSelectionModal() {
+            document.getElementById('file-selection-modal').classList.remove('active');
+        }
+
+        function openHistoryModal() {
+            document.getElementById('history-modal').classList.add('active');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.remove('active');
+        }
+
+        function initializeFileTree() {
+            document.querySelectorAll('.tree-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const item = this.closest('.tree-item');
+                    item.classList.toggle('open');
+                    this.classList.toggle('rotate-90');
+                });
+            });
+
+            document.querySelectorAll('.folder-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function(e) {
+                    e.stopPropagation();
+                    const item = this.closest('.tree-item');
+                    const childCheckboxes = item.querySelectorAll('input[type="checkbox"]');
+                    childCheckboxes.forEach(child => {
+                        child.checked = this.checked;
+                    });
+                });
+            });
+        }
+
+        function expandAllFolders() {
+            document.querySelectorAll('.tree-item').forEach(item => item.classList.add('open'));
+            document.querySelectorAll('.tree-toggle').forEach(toggle => toggle.classList.add('rotate-90'));
+        }
+
+        function collapseAllFolders() {
+            document.querySelectorAll('.tree-item').forEach(item => item.classList.remove('open'));
+            document.querySelectorAll('.tree-toggle').forEach(toggle => toggle.classList.remove('rotate-90'));
+        }
+
+        function addSelectedFiles() {
+            const selectedFiles = [];
+            document.querySelectorAll('.file-checkbox:checked').forEach(checkbox => {
+                selectedFiles.push(checkbox.dataset.filepath);
+            });
+
+            const contextContainer = document.getElementById('context-files-container');
+            if (selectedFiles.length > 0) {
+                contextContainer.innerHTML = '';
+                selectedFiles.forEach(filePath => {
+                    const fileEntry = document.createElement('div');
+                    fileEntry.className = 'p-2 rounded-md bg-dark-card hover:bg-dark-light border-l-2 border-primary my-1 text-xs';
+                    fileEntry.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center min-w-0 flex-1">
+                                <i class="fas fa-file-code text-primary-light mr-2 flex-shrink-0 text-sm"></i>
+                                <span class="text-gray-300 truncate" title="${filePath}">${filePath}</span>
+                            </div>
+                            <button onclick="removeContextFile(this)" class="ml-2 text-gray-500 hover:text-red-400 flex-shrink-0">
+                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    contextContainer.appendChild(fileEntry);
+                });
+                filesCount = selectedFiles.length;
+                document.getElementById('files-count').textContent = filesCount;
+                addLog(`Added ${selectedFiles.length} file(s) to context`, 'blue');
+            }
+            closeFileSelectionModal();
+        }
+
+        function removeContextFile(button) {
+            button.closest('div').remove();
+            filesCount--;
+            document.getElementById('files-count').textContent = filesCount;
+            const contextContainer = document.getElementById('context-files-container');
+            if (contextContainer.children.length === 0) {
+                contextContainer.innerHTML = '<div class="text-xs text-gray-500 text-center py-6">No files loaded</div>';
+            }
+        }
+
+        function clearContextFiles() {
+            document.getElementById('context-files-container').innerHTML = '<div class="text-xs text-gray-500 text-center py-6">No files loaded</div>';
+            filesCount = 0;
+            document.getElementById('files-count').textContent = filesCount;
+            addLog('Context files cleared', 'blue');
+        }
+
+        function sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messageList = document.getElementById('message-list');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'flex items-start justify-end';
+
+            const inputTokens = Math.floor(Math.random() * 500) + 100;
+            const cost = (inputTokens * 0.00003).toFixed(4);
+
+            userMessage.innerHTML = `
+                <div class="bg-dark-card rounded-lg p-4 max-w-[80%] border border-dark-light">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="cost-badge text-primary" title="Input tokens: ${inputTokens}">
+                            <i class="fas fa-dollar-sign"></i> ${cost}
+                        </span>
+                    </div>
+                    <div class="prose prose-invert text-gray-200 text-sm">
+                        ${message}
+                    </div>
+                </div>
+                <div class="w-9 h-9 bg-gray-600 rounded-lg flex items-center justify-center ml-3 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+            `;
+            messageList.appendChild(userMessage);
+            input.value = '';
+            messageList.scrollTop = messageList.scrollHeight;
+
+            messageCount++;
+            sessionTokensInput += inputTokens;
+            sessionCost += parseFloat(cost);
+            updateMetrics();
+
+            addLog('Message sent to LLM', 'blue');
+
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'flex items-start';
+
+                const outputTokens = Math.floor(Math.random() * 800) + 200;
+                const outputCost = (outputTokens * 0.00006).toFixed(4);
+
+                aiMessage.innerHTML = `
+                    <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="bg-dark-card rounded-lg p-4 flex-1 border border-dark-light">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="cost-badge text-primary" title="Output tokens: ${outputTokens}">
+                                <i class="fas fa-dollar-sign"></i> ${outputCost}
+                            </span>
+                        </div>
+                        <div class="prose prose-invert text-gray-300 text-sm">
+                            <p>I can help you with that. Let me analyze your request and provide a solution.</p>
+                        </div>
+                    </div>
+                `;
+                messageList.appendChild(aiMessage);
+                messageList.scrollTop = messageList.scrollHeight;
+
+                sessionTokensOutput += outputTokens;
+                sessionCost += parseFloat(outputCost);
+                updateMetrics();
+
+                addLog('Response received from LLM', 'green');
+            }, 1000);
+        }
+
+        function updateMetrics() {
+            document.getElementById('input-tokens').textContent = sessionTokensInput.toLocaleString();
+            document.getElementById('output-tokens').textContent = sessionTokensOutput.toLocaleString();
+            document.getElementById('cached-tokens').textContent = cachedTokens.toLocaleString();
+            document.getElementById('message-count').textContent = messageCount;
+            document.getElementById('session-cost').textContent = '$' + sessionCost.toFixed(4);
+
+            const contextUsed = sessionTokensInput + sessionTokensOutput;
+            const contextLimit = 200000;
+            const percentage = Math.min((contextUsed / contextLimit) * 100, 100);
+
+            document.getElementById('context-used').textContent = (contextUsed / 1000).toFixed(1) + 'K';
+            document.getElementById('context-bar').style.width = percentage + '%';
+        }
+
+        function handleKeydown(event) {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                event.preventDefault();
+                sendMessage(event);
+            }
+        }
+
+        function clearChat() {
+            const messageList = document.getElementById('message-list');
+            messageList.innerHTML = `
+                <div class="flex items-start">
+                    <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="bg-dark-card rounded-lg p-4 flex-1 border border-dark-light">
+                        <p class="text-gray-300 text-sm">Chat history cleared. Ready for a new conversation!</p>
+                    </div>
+                </div>
+            `;
+            messageCount = 0;
+            sessionTokensInput = 0;
+            sessionTokensOutput = 0;
+            sessionCost = 0;
+            updateMetrics();
+            addLog('Chat history cleared', 'blue');
+        }
+
+        function addLog(message, color) {
+            const logsContainer = document.getElementById('logs-container');
+            if (logsContainer.querySelector('.text-center')) {
+                logsContainer.innerHTML = '';
+            }
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `p-2 rounded-md bg-dark-card hover:bg-dark-light border-l-2 border-${color}-500 my-1 text-xs`;
+            logEntry.innerHTML = `
+                <div class="text-gray-300">${message}</div>
+                <div class="text-gray-500 text-[10px] mt-0.5">${new Date().toLocaleTimeString()}</div>
+            `;
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+
+            if (logsContainer.children.length > 30) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logs-container').innerHTML = '<div class="text-xs text-gray-500 text-center py-6">No logs yet</div>';
+        }
+    </script>
+</body>
+</html>
