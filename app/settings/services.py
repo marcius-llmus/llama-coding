@@ -3,7 +3,6 @@ from app.settings.repositories import LLMSettingsRepository, SettingsRepository
 from app.settings.schemas import (
     LLMSettingsCreate,
     LLMSettingsUpdate,
-    SettingsInternalUpdate,
     SettingsUpdate,
 )
 
@@ -42,15 +41,10 @@ class SettingsService:
     def update_settings(self, *, settings_in: SettingsUpdate) -> Settings:
         settings = self.get_settings()
 
-        self.llm_settings_service.update_llm_settings(
-            llm_settings_id=settings.coding_llm_settings_id,
-            settings_in=settings_in.coding_llm_settings,
-        )
+        if settings_in.coding_llm_settings:
+            self.llm_settings_service.update_llm_settings(
+                llm_settings_id=settings.coding_llm_settings_id,
+                settings_in=settings_in.coding_llm_settings,
+            )
 
-        repo_update_model = SettingsInternalUpdate(
-            max_history_length=settings_in.max_history_length,
-            ast_token_limit=settings_in.ast_token_limit,
-            coding_llm_settings_id=settings.coding_llm_settings_id,
-        )
-
-        return self.settings_repo.update(db_obj=settings, obj_in=repo_update_model)
+        return self.settings_repo.update(db_obj=settings, obj_in=settings_in)

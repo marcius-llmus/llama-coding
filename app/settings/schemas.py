@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.settings.enums import CodingMode, ContextStrategy, OperationalMode
 
@@ -32,20 +32,14 @@ class SettingsBase(BaseModel):
     ast_token_limit: int
 
 
-class SettingsInternalUpdate(BaseModel):
-    max_history_length: int
-    ast_token_limit: int
-    coding_llm_settings_id: int
-
-
 class SettingsCreate(SettingsBase):
     coding_llm_settings_id: int
 
 
 class SettingsUpdate(BaseModel):
-    max_history_length: int
-    ast_token_limit: int
-    coding_llm_settings: LLMSettingsUpdate
+    max_history_length: int | None = None
+    ast_token_limit: int | None = None
+    coding_llm_settings: LLMSettingsUpdate | None = Field(default=None, exclude=True)
 
 
 class SettingsRead(SettingsBase):
