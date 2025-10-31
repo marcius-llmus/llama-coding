@@ -6,3 +6,8 @@ class PromptType(StrEnum):
     GLOBAL = "global"
     PROJECT = "project"
     TEMPLATE_APP = "template_app"
+
+
+class PromptTargetSelector(StrEnum):
+    GLOBAL = "#global-prompt-list-container"
+    PROJECT = "#project-prompt-list-container"

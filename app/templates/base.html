@@ -211,19 +211,41 @@
             element.classList.add('text-gray-300');
 
             const promptText = document.getElementById('new-prompt-text');
+            document.getElementById('global-prompts').style.display = 'none';
+            document.getElementById('project-prompts').style.display = 'none';
+            document.getElementById('template-apps-prompts').style.display = 'none';
+
             if (tab === 'global') {
                 document.getElementById('global-prompts').style.display = 'block';
-                document.getElementById('project-prompts').style.display = 'none';
                 promptText.textContent = 'New Global Prompt';
-            } else {
-                document.getElementById('global-prompts').style.display = 'none';
+            } else if (tab === 'project') {
                 document.getElementById('project-prompts').style.display = 'block';
                 promptText.textContent = 'New Project Prompt';
+            } else if (tab === 'template_app') {
+                document.getElementById('template-apps-prompts').style.display = 'block';
+                promptText.textContent = 'New Template App';
             }
         }
 
         function createNewPrompt() {
-            addLog(`Creating new ${currentPromptTab} prompt`, 'blue');
+            // This function will now trigger an htmx request to get the form
+            let target, url;
+            if (currentPromptTab === 'global') {
+                target = '#global-prompt-list-container';
+                url = '/prompts/new?type=global';
+            } else if (currentPromptTab === 'project') {
+                target = '#project-prompt-list-container';
+                url = '/prompts/new?type=project';
+            } else {
+                addLog('Cannot create new Template App prompts from UI.', 'yellow');
+                return;
+            }
+
+            if (document.getElementById('prompt-form-container')) {
+                return;
+            }
+
+            htmx.ajax('GET', url, { target: target, swap: 'afterbegin' });
         }
 
         function clearHistory() {

@@ -1,0 +1,60 @@
+<div id="prompt-modal-content" class="bg-dark-card rounded-lg w-full max-w-4xl border border-dark-light max-h-[90vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-dark-light flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Prompt Configuration</h2>
+        <button onclick="closePromptModal()" class="text-gray-400 hover:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="px-6 py-3 border-b border-dark-light flex items-center justify-between">
+        <div class="flex">
+            <button class="prompt-tab active text-gray-300" onclick="switchPromptTab('global', this)">
+                Global Prompts
+            </button>
+            <button class="prompt-tab text-gray-500" onclick="switchPromptTab('project', this)">
+                Project Prompts
+            </button>
+            <button class="prompt-tab text-gray-500" onclick="switchPromptTab('template_app', this)">
+                Template Apps
+            </button>
+        </div>
+    </div>
+
+    <div class="p-6 space-y-4 overflow-y-auto flex-1 modal-scroll-content" style="max-height: calc(75vh - 180px);">
+        <div id="global-prompts">
+            <div class="space-y-2" id="global-prompt-list-container">
+                {% include "prompts/partials/prompt_list.html" with {"prompts": global_prompts} %}
+            </div>
+        </div>
+
+        <div id="project-prompts" style="display: none;">
+            <div class="space-y-2" id="project-prompt-list-container">
+                 {% if active_project %}
+                    {% include "prompts/partials/prompt_list.html" with {"prompts": project_prompts} %}
+                {% else %}
+                    <div class="text-xs text-gray-500 text-center py-6">Select a project to see project prompts</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="template-apps-prompts" style="display: none;">
+            <div class="space-y-2" id="template-apps-prompt-list-container">
+                {% include "prompts/partials/prompt_list.html" with {"prompts": template_app_prompts} %}
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-dark-light flex justify-between">
+        <button id="new-prompt-btn" onclick="createNewPrompt()" class="px-4 py-2 bg-primary hover:bg-primary-dark rounded-lg text-sm font-medium text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span id="new-prompt-text">New Global Prompt</span>
+        </button>
+        <button onclick="closePromptModal()" class="px-4 py-2 bg-dark-lighter hover:bg-dark-light border border-dark-light rounded-lg text-sm">
+            Close
+        </button>
+    </div>
+</div>
