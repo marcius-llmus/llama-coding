@@ -1,0 +1,10 @@
+<div id="prompt-{{ prompt.id }}" class="p-4 bg-dark-lighter rounded-md border-l-2 border-transparent cursor-pointer hover:bg-dark-light">
+    <div class="flex items-center justify-between mb-2">
+        <h4 class="text-sm font-semibold text-white">{{ prompt.name }}</h4>
+        <div class="flex space-x-2">
+            <button class="text-xs text-gray-400 hover:text-primary">Edit</button>
+            <button class="text-xs text-gray-400 hover:text-green-400">Attach</button>
+        </div>
+    </div>
+    <p class="text-xs text-gray-400 truncate">{{ prompt.content }}</p>
+</div>

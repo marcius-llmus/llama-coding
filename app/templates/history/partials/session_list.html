@@ -1,0 +1,7 @@
+{% if sessions %}
+    {% for session in sessions %}
+        {% include "history/partials/session_item.html" %}
+    {% endfor %}
+{% else %}
+    <div class="text-xs text-gray-500 text-center py-6">No history for this project</div>
+{% endif %}

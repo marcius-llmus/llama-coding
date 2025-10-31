@@ -1,0 +1,11 @@
+<div id="project-{{ project.id }}" class="p-4 bg-dark-lighter hover:bg-dark-light rounded-md cursor-pointer border-l-2 {% if project.is_active %}border-primary{% else %}border-transparent{% endif %}">
+    <div class="flex items-center justify-between">
+        <div>
+            <h4 class="text-sm font-semibold text-white">{{ project.name }}</h4>
+            <p class="text-xs text-gray-400">{{ project.path }}</p>
+        </div>
+        {% if project.is_active %}
+            <span class="text-xs text-primary">Active</span>
+        {% endif %}
+    </div>
+</div>

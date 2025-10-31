@@ -23,54 +23,7 @@
 
         <div class="flex-1 overflow-y-auto p-6 modal-scroll-content" style="max-height: calc(75vh - 200px);">
             <ul class="space-y-1" id="file-tree">
-                <li class="tree-item">
-                    <div class="tree-item-header p-2 hover:bg-dark-light rounded-lg flex items-center cursor-pointer">
-                        <input type="checkbox" class="folder-checkbox mr-2 h-4 w-4 rounded text-primary">
-                        <i class="fas fa-chevron-right tree-toggle w-4 text-gray-500"></i>
-                        <i class="fas fa-folder text-primary-light ml-1 mr-2"></i>
-                        <span class="text-gray-200">src</span>
-                    </div>
-                    <ul class="tree-item-children pl-8 space-y-1">
-                        <li class="tree-item">
-                            <div class="tree-item-header p-2 hover:bg-dark-light rounded-lg flex items-center cursor-pointer">
-                                <input type="checkbox" class="folder-checkbox mr-2 h-4 w-4 rounded text-primary">
-                                <i class="fas fa-chevron-right tree-toggle w-4 text-gray-500"></i>
-                                <i class="fas fa-folder text-primary-light ml-1 mr-2"></i>
-                                <span class="text-gray-200">components</span>
-                            </div>
-                            <ul class="tree-item-children pl-8 space-y-1">
-                                <li class="file-item">
-                                    <div class="p-2 hover:bg-dark-light rounded-lg flex items-center">
-                                        <input type="checkbox" class="file-checkbox mr-2 h-4 w-4 rounded text-primary" data-filepath="src/components/Button.jsx">
-                                        <i class="fas fa-file-code text-blue-400 ml-1 mr-2"></i>
-                                        <span class="text-gray-200">Button.jsx</span>
-                                    </div>
-                                </li>
-                                <li class="file-item">
-                                    <div class="p-2 hover:bg-dark-light rounded-lg flex items-center">
-                                        <input type="checkbox" class="file-checkbox mr-2 h-4 w-4 rounded text-primary" data-filepath="src/components/Header.jsx">
-                                        <i class="fas fa-file-code text-blue-400 ml-1 mr-2"></i>
-                                        <span class="text-gray-200">Header.jsx</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="file-item">
-                            <div class="p-2 hover:bg-dark-light rounded-lg flex items-center">
-                                <input type="checkbox" class="file-checkbox mr-2 h-4 w-4 rounded text-primary" data-filepath="src/App.jsx">
-                                <i class="fas fa-file-code text-blue-400 ml-1 mr-2"></i>
-                                <span class="text-gray-200">App.jsx</span>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-                <li class="file-item">
-                    <div class="p-2 hover:bg-dark-light rounded-lg flex items-center">
-                        <input type="checkbox" class="file-checkbox mr-2 h-4 w-4 rounded text-primary" data-filepath="package.json">
-                        <i class="fas fa-file-code text-green-400 ml-1 mr-2"></i>
-                        <span class="text-gray-200">package.json</span>
-                    </div>
-                </li>
+                <div class="text-xs text-gray-500 text-center py-6">No project selected</div>
             </ul>
         </div>
 

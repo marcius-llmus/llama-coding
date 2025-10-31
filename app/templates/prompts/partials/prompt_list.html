@@ -1,0 +1,7 @@
+{% if prompts %}
+    {% for prompt in prompts %}
+        {% include "prompts/partials/prompt_item.html" %}
+    {% endfor %}
+{% else %}
+    <div class="text-xs text-gray-500 text-center py-6">No prompts found</div>
+{% endif %}
