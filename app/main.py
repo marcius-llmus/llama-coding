@@ -8,6 +8,7 @@ from fastapi_htmx import htmx_init
 from app.chat.routes.htmx import router as chat_htmx_router
 from app.core.db import engine
 from app.core.templating import templates
+from app.projects.routes.htmx import router as projects_htmx_router
 from app.settings.routes.htmx import router as settings_htmx_router
 from app.settings.utils import initialize_application_settings
 
@@ -25,6 +26,7 @@ app = FastAPI(lifespan=lifespan)
 htmx_init(templates=templates, file_extension="html")
 
 app.include_router(settings_htmx_router, prefix="/settings", tags=["settings"])
+app.include_router(projects_htmx_router, prefix="/projects", tags=["projects"])
 app.include_router(chat_htmx_router, prefix="/chat", tags=["chat"])
 
 
