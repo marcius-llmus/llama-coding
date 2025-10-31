@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 from app.commons.repositories import BaseRepository
 from app.settings.models import LLMSettings, Settings
 from app.settings.schemas import LLMSettingsCreate, SettingsCreate
@@ -25,3 +27,10 @@ class SettingsRepository(BaseRepository[Settings]):
         self.db.flush()
         self.db.refresh(db_obj)
         return db_obj
+
+    def get(self, pk: int = 1) -> Settings | None:
+        return self.db.get(self.model, pk)
+
+    def delete(self, *, pk: int = 1) -> Settings | None:
+        """Settings is a singleton and cannot be deleted."""
+        raise NotImplementedError("Settings is a singleton and cannot be deleted.")
