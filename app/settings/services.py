@@ -1,10 +1,7 @@
 from app.settings.models import LLMSettings, Settings
 from app.settings.repositories import LLMSettingsRepository, SettingsRepository
-from app.settings.schemas import (
-    LLMSettingsCreate,
-    LLMSettingsUpdate,
-    SettingsUpdate,
-)
+from app.settings.exceptions import LLMSettingsNotFoundException, SettingsNotFoundException
+from app.settings.schemas import LLMSettingsUpdate, SettingsUpdate
 
 
 class LLMSettingsService:
@@ -14,7 +11,7 @@ class LLMSettingsService:
     def update_llm_settings(self, *, llm_settings_id: int, settings_in: LLMSettingsUpdate) -> LLMSettings:
         db_obj = self.llm_settings_repo.get(pk=llm_settings_id)
         if not db_obj:
-            raise RuntimeError(f"LLMSettings with id {llm_settings_id} not found.")
+            raise LLMSettingsNotFoundException(f"LLMSettings with id {llm_settings_id} not found.")
         return self.llm_settings_repo.update(db_obj=db_obj, obj_in=settings_in)
 
 
@@ -31,12 +28,8 @@ class SettingsService:
         settings = self.settings_repo.get(pk=1)
         if not settings:
             # This should not happen if the startup hook is successful
-            raise RuntimeError("Application settings have not been initialized.")
+            raise SettingsNotFoundException("Application settings have not been initialized.")
         return settings
-
-    def get_settings_page_data(self) -> dict:
-        settings = self.get_settings()
-        return {"settings": settings}
 
     def update_settings(self, *, settings_in: SettingsUpdate) -> Settings:
         settings = self.get_settings()
@@ -48,3 +41,12 @@ class SettingsService:
             )
 
         return self.settings_repo.update(db_obj=settings, obj_in=settings_in)
+
+
+class SettingsPageService:
+    def __init__(self, settings_service: SettingsService):
+        self.settings_service = settings_service
+
+    def get_settings_page_data(self) -> dict:
+        settings = self.settings_service.get_settings()
+        return {"settings": settings}

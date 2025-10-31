@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.commons.dependencies import get_db
 from app.settings.repositories import LLMSettingsRepository, SettingsRepository
-from app.settings.services import LLMSettingsService, SettingsService
+from app.settings.services import (
+    LLMSettingsService,
+    SettingsPageService,
+    SettingsService,
+)
 
 
 def get_llm_settings_repository(db: Session = Depends(get_db)) -> LLMSettingsRepository:
@@ -25,3 +29,9 @@ def get_settings_service(
     llm_settings_service: LLMSettingsService = Depends(get_llm_settings_service),
 ) -> SettingsService:
     return SettingsService(settings_repo=settings_repo, llm_settings_service=llm_settings_service)
+
+
+def get_settings_page_service(
+    settings_service: SettingsService = Depends(get_settings_service),
+) -> SettingsPageService:
+    return SettingsPageService(settings_service=settings_service)
