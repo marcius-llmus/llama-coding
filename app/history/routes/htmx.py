@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from fastapi_htmx import htmx
+from app.commons.fastapi_htmx import htmx
 
 from app.history.dependencies import get_history_page_service, get_history_service
 from app.history.exceptions import ChatSessionNotFoundException

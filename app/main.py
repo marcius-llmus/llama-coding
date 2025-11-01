@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from fastapi_htmx import htmx_init
+from app.commons.fastapi_htmx import htmx_init
 
 from app.coder.routes.htmx import router as coder_htmx_router
 from app.chat.routes.htmx import router as chat_htmx_router

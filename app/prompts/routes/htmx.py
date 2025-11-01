@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import HTMLResponse
-from fastapi_htmx import htmx
+from app.commons.fastapi_htmx import htmx
 
 from app.core.templating import templates
 from app.projects.exceptions import ActiveProjectRequiredException

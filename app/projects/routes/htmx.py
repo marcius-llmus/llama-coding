@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from fastapi_htmx import htmx
+from app.commons.fastapi_htmx import htmx
 
 from app.projects.dependencies import get_project_page_service, get_project_service
 from app.projects.exceptions import ProjectNotFoundException

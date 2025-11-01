@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
-from fastapi_htmx import htmx
+from app.commons.fastapi_htmx import htmx
 
 from app.core.templating import templates
 from app.settings.dependencies import get_settings_page_service, get_settings_service

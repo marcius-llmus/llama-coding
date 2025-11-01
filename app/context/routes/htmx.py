@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi_htmx import htmx
+from app.commons.fastapi_htmx import htmx
 
 from app.context.dependencies import get_context_page_service
 from app.context.services import ContextPageService
