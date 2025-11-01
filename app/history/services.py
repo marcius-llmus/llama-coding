@@ -3,6 +3,7 @@ from app.projects.services import ProjectService
 from app.history.exceptions import ChatSessionNotFoundException
 from app.history.models import ChatSession
 from app.history.repositories import ChatSessionRepository
+from app.history.schemas import ChatSessionCreate
 
 
 class HistoryService:
@@ -11,6 +12,9 @@ class HistoryService:
 
     def get_sessions_by_project(self, project_id: int) -> list[ChatSession]:
         return self.session_repo.list_by_project(project_id=project_id)
+
+    def create_session(self, session_in: ChatSessionCreate) -> ChatSession:
+        return self.session_repo.create(obj_in=session_in)
 
     def delete_session(self, session_id: int) -> None:
         session = self.session_repo.get(pk=session_id)
