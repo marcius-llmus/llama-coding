@@ -29,7 +29,7 @@ async def get_settings_modal(
 
 
 @router.post("/", response_class=HTMLResponse)
-@htmx("settings/partials/modal_content", re_swap="innerHTML")
+@htmx("settings/partials/modal_content")
 async def update_settings(
     request: Request,
     settings_in: SettingsUpdate,

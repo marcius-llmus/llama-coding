@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.commons.fastapi_htmx import htmx_init
 
@@ -29,10 +31,17 @@ app = FastAPI(lifespan=lifespan)
 
 htmx_init(templates=templates, file_extension="html")
 
-app.include_router(coder_htmx_router, prefix="/", tags=["coder"])
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+app.include_router(coder_htmx_router, prefix="/coder", tags=["coder"])
 app.include_router(settings_htmx_router, prefix="/settings", tags=["settings"])
 app.include_router(projects_htmx_router, prefix="/projects", tags=["projects"])
 app.include_router(prompts_htmx_router, prefix="/prompts", tags=["prompts"])
 app.include_router(context_htmx_router, prefix="/context", tags=["context"])
 app.include_router(history_htmx_router, prefix="/history", tags=["history"])
 app.include_router(chat_htmx_router, prefix="/chat", tags=["chat"])
+
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/coder")
