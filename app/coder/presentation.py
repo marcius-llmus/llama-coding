@@ -4,9 +4,9 @@ from typing import Any, Callable, Coroutine
 from fastapi import WebSocketDisconnect
 from pydantic import ValidationError
 
-from app.chat.enums import StreamEventType
-from app.chat.schemas import WebSocketMessage
-from app.chat.services import ChatService
+from app.coder.enums import CoderEventType
+from app.coder.schemas import WebSocketMessage
+from app.coder.services import CoderService
 from app.commons.websockets import WebSocketConnectionManager
 from app.core.templating import templates
 
@@ -18,14 +18,17 @@ Handler = Callable[[Any], Coroutine[Any, Any, None]]
 class WebSocketOrchestrator:
     def __init__(
         self,
-        chat_service: ChatService,
+        coder_service: CoderService,
         ws_manager: WebSocketConnectionManager,
     ):
-        self.chat_service = chat_service
+        self.coder_service = coder_service
         self.ws_manager = ws_manager
-        self.event_handlers: dict[StreamEventType, Handler] = {
-            StreamEventType.USER_MESSAGE: self._render_user_message,
-            StreamEventType.AI_MESSAGE_CHUNK: self._render_ai_message_chunk,
+        self.event_handlers: dict[CoderEventType, Handler] = {
+            CoderEventType.USER_MESSAGE: self._render_user_message,
+            CoderEventType.AI_MESSAGE_CHUNK: self._render_ai_message_chunk,
+            CoderEventType.SYSTEM_LOG_APPENDED: self._render_system_log,
+            CoderEventType.USAGE_METRICS_UPDATED: self._render_usage_metrics,
+            CoderEventType.ERROR: self._render_error,
         }
 
     async def _process_chunk(self, chunk: dict):
@@ -33,7 +36,8 @@ class WebSocketOrchestrator:
         event_data = chunk["data"]
         handler = self.event_handlers.get(event_type)
         if not handler:
-            raise ValueError(f"Unknown event type: {chunk['type']}")
+            logger.warning(f"No handler for event type: {event_type}")
+            return
         await handler(event_data)
 
     async def handle_connection(self):
@@ -47,9 +51,10 @@ class WebSocketOrchestrator:
                     message = WebSocketMessage(**data)
                 except ValidationError as e:
                     logger.error(f"WebSocket validation error: {e}", exc_info=True)
+                    await self._render_error(f"Invalid message format: {e}")
                     continue
 
-                stream = self.chat_service.stream_chat_response(content=message.message)
+                stream = self.coder_service.stream_workflow_response(user_message=message.message)
 
                 async for chunk in stream:
                     await self._process_chunk(chunk)
@@ -60,18 +65,22 @@ class WebSocketOrchestrator:
             logger.error(f"An error occurred in WebSocket: {e}", exc_info=True)
             await self._render_error(str(e))
 
-    async def _render_user_message(self, message: str):
-        template = templates.get_template("chat/partials/user_message.html").render({"message": message})
+    async def _render_user_message(self, data: dict):
+        template = templates.get_template("chat/partials/user_message.html").render(data)
         await self.ws_manager.send_html(template)
 
-    async def _render_ai_message_chunk(self, chunk: str):
-        # This will be expanded to handle proper streaming into a container
-        # For now, it sends a complete bubble per chunk for demonstration.
-        template = templates.get_template("chat/partials/ai_message.html").render({"message": chunk})
+    async def _render_ai_message_chunk(self, data: dict):
+        template = templates.get_template("chat/partials/ai_message.html").render(data)
+        await self.ws_manager.send_html(template)
+
+    async def _render_system_log(self, data: dict):
+        template = templates.get_template("logs/partials/log_item.html").render(data)
+        await self.ws_manager.send_html(template)
+
+    async def _render_usage_metrics(self, data: dict):
+        template = templates.get_template("usage/partials/session_metrics.html").render(data)
         await self.ws_manager.send_html(template)
 
     async def _render_error(self, error_message: str):
-        template = templates.get_template("chat/partials/error_message.html").render(
-            {"message": error_message}
-        )
+        template = templates.get_template("chat/partials/error_message.html").render({"message": error_message})
         await self.ws_manager.send_html(template)

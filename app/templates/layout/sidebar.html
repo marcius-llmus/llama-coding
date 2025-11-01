@@ -89,8 +89,7 @@
     <div class="p-6 mt-auto bg-dark-lighter">
         <button
             hx-post="/chat/clear"
-            hx-target="#message-list"
-            hx-swap="innerHTML"
+            hx-on:click="document.getElementById('message-list').innerHTML = ''"
             class="w-full text-left px-4 py-3 rounded-lg bg-dark-lighter hover:bg-dark-light border border-dark-light text-sm flex items-center text-red-400"
         >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,4 +1,4 @@
-<div class="border-b border-dark-light overflow-hidden flex flex-col bg-dark-darker border-t border-dark-light">
+<div id="session-metrics-container" hx-swap-oob="true" class="border-b border-dark-light overflow-hidden flex flex-col bg-dark-darker border-t border-dark-light">
     <div class="flex items-center justify-between p-3 bg-dark-card border-b border-dark-light">
         <div class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,20 +10,20 @@
     <div class="p-6 space-y-3 bg-dark-lighter">
         <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">Session Cost:</span>
-            <span class="text-sm font-bold text-primary" id="session-cost">$0.00</span>
+            <span class="text-sm font-bold text-primary" id="session-cost">${{ "%.4f"|format(metrics.session_cost) }}</span>
         </div>
         <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">Last 30 Days:</span>
-            <span class="text-sm font-semibold text-gray-200" id="monthly-cost">$0.00</span>
+            <span class="text-sm font-semibold text-gray-200" id="monthly-cost">${{ "%.2f"|format(metrics.monthly_cost) }}</span>
         </div>
         <div class="border-t border-dark-light"></div>
         <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">Total Tokens</span>
         </div>
         <div class="text-[10px] space-y-1 pl-2">
-            <div class="flex justify-between"><span class="text-gray-500">Input:</span> <span class="text-gray-300" id="input-tokens">0</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Cached:</span> <span class="text-gray-300" id="cached-tokens">0</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Output:</span> <span class="text-gray-300" id="output-tokens">0</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Input:</span> <span class="text-gray-300" id="input-tokens">{{ metrics.input_tokens }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Cached:</span> <span class="text-gray-300" id="cached-tokens">{{ metrics.cached_tokens }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Output:</span> <span class="text-gray-300" id="output-tokens">{{ metrics.output_tokens }}</span></div>
         </div>
         <div class="border-t border-dark-light"></div>
         <div>
@@ -38,11 +38,11 @@
         <div class="border-t border-dark-light"></div>
         <div class="grid grid-cols-2 gap-3 text-center">
             <div>
-                <div class="text-lg font-semibold text-gray-200" id="message-count">0</div>
+                <div class="text-lg font-semibold text-gray-200" id="message-count">{{ metrics.message_count }}</div>
                 <div class="text-xs text-gray-500">Messages</div>
             </div>
             <div>
-                <div class="text-lg font-semibold text-gray-200" id="files-count">0</div>
+                <div class="text-lg font-semibold text-gray-200" id="files-count">{{ metrics.files_count }}</div>
                 <div class="text-xs text-gray-500">Files</div>
             </div>
         </div>

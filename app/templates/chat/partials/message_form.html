@@ -1,8 +1,7 @@
 <form
     class="p-6 border-t border-dark-light bg-dark-lighter"
-    hx-post="/chat/"
-    hx-target="#message-list"
-    hx-swap="beforeend"
+    hx-ws="send"
+    _="on htmx:wsAfterSend reset() me"
     hx-on::after-request="this.reset()"
     hx-ext="form-json"
 >
