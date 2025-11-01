@@ -342,3 +342,4 @@ diffs.md
 cache.*
 tailwindcss
 .idea
+*.db
