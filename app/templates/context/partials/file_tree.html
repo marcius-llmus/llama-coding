@@ -1,0 +1,28 @@
+{% macro render_tree(item) %}
+<li class="tree-item">
+    <div class="flex items-center p-1 rounded hover:bg-dark-light cursor-pointer">
+        {% if item.type == 'folder' %}
+            <span class="tree-toggle w-5 text-center text-gray-500 mr-1 transition-transform">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </span>
+            <input type="checkbox" class="folder-checkbox mr-2 bg-dark-card border-dark-light focus:ring-primary">
+            <i class="fas fa-folder text-primary mr-2"></i>
+            <span class="text-sm text-gray-300">{{ item.name }}</span>
+        {% else %}
+            <span class="w-5 mr-1"></span>
+            <input type="checkbox" class="file-checkbox mr-2 bg-dark-card border-dark-light focus:ring-primary" data-filepath="{{ item.path }}">
+            <i class="fas fa-file-code text-gray-400 mr-2"></i>
+            <span class="text-sm text-gray-400">{{ item.name }}</span>
+        {% endif %}
+    </div>
+    {% if item.type == 'folder' and item.children %}
+        <ul class="tree-item-children pl-5 transition-all duration-200">
+            {% for child in item.children %}
+                {{ render_tree(child) }}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>
+{% endmacro %}
+
+{{ render_tree(file_tree) }}
