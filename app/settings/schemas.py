@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.settings.enums import CodingMode, ContextStrategy, OperationalMode
@@ -5,7 +6,7 @@ from app.settings.enums import CodingMode, ContextStrategy, OperationalMode
 
 class LLMSettingsBase(BaseModel):
     model_name: str
-    temperature: float
+    temperature: Decimal = Field(..., ge=0, le=1, max_digits=3, decimal_places=2)
     context_window: int
 
 
@@ -19,9 +20,9 @@ class LLMSettingsRead(LLMSettingsBase):
 
 
 class LLMSettingsUpdate(BaseModel):
-    model_name: str
-    temperature: float
-    context_window: int
+    model_name: str | None = None
+    temperature: Decimal | None = Field(default=None, ge=0, le=1, max_digits=3, decimal_places=2)
+    context_window: int | None = None
 
 
 class SettingsBase(BaseModel):
