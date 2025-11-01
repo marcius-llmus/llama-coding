@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 from app.chat.services import ChatService
 from app.coder.enums import CoderEventType
 from app.usage.services import UsageService
+from app.usage.services import UsagePageService
 
 
 class CoderService:
@@ -44,3 +45,11 @@ class CoderService:
         metrics.session_cost = 0.00012
         metrics.message_count = len(message_obj.session.messages)
         yield {"type": CoderEventType.USAGE_METRICS_UPDATED, "data": {"metrics": metrics}}
+
+
+class CoderPageService:
+    def __init__(self, usage_page_service: UsagePageService):
+        self.usage_page_service = usage_page_service
+
+    def get_main_page_data(self) -> dict:
+        return self.usage_page_service.get_session_metrics_page_data()
