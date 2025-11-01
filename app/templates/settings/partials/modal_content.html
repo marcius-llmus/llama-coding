@@ -26,9 +26,9 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Coding LLM</label>
                         <select name="coding_llm_settings.model_name" class="w-full bg-dark-lighter border border-dark-light rounded-lg px-3 py-2 text-sm">
-                            <option {% if settings.coding_llm_settings.model_name == 'GPT-4' %}selected{% endif %}>GPT-4</option>
-                            <option {% if settings.coding_llm_settings.model_name == 'Claude 3 Opus' %}selected{% endif %}>Claude 3 Opus</option>
-                            <option {% if settings.coding_llm_settings.model_name == 'Llama 3 70B' %}selected{% endif %}>Llama 3 70B</option>
+                            <option value="GPT-4" {% if settings.coding_llm_settings.model_name == 'GPT-4' %}selected{% endif %}>GPT-4 - OpenAI</option>
+                            <option value="Claude 3 Opus" {% if settings.coding_llm_settings.model_name == 'Claude 3 Opus' %}selected{% endif %}>Claude 3 Opus - Anthropic</option>
+                            <option value="Llama 3 70B" {% if settings.coding_llm_settings.model_name == 'Llama 3 70B' %}selected{% endif %}>Llama 3 70B - Meta</option>
                         </select>
                     </div>
                 </div>

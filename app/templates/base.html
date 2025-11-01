@@ -176,17 +176,8 @@
     {% include "history/partials/modal.html" %}
 
     <script>
-        let sessionTokensInput = 0;
-        let sessionTokensOutput = 0;
-        let sessionCost = 0;
-        let cachedTokens = 0;
-        let monthlyCost = 12.45;
-        let messageCount = 0;
         let filesCount = 0;
         let currentPromptTab = 'global';
-
-        document.getElementById('session-start').textContent = new Date().toLocaleTimeString();
-        document.getElementById('monthly-cost').textContent = '$' + monthlyCost.toFixed(2);
 
         function copyCode(button) {
             const codeBlock = button.parentElement.querySelector('code');
@@ -213,7 +204,6 @@
             const promptText = document.getElementById('new-prompt-text');
             document.getElementById('global-prompts').style.display = 'none';
             document.getElementById('project-prompts').style.display = 'none';
-            document.getElementById('template-apps-prompts').style.display = 'none';
 
             if (tab === 'global') {
                 document.getElementById('global-prompts').style.display = 'block';
@@ -221,9 +211,6 @@
             } else if (tab === 'project') {
                 document.getElementById('project-prompts').style.display = 'block';
                 promptText.textContent = 'New Project Prompt';
-            } else if (tab === 'template_app') {
-                document.getElementById('template-apps-prompts').style.display = 'block';
-                promptText.textContent = 'New Template App';
             }
         }
 
@@ -236,9 +223,6 @@
             } else if (currentPromptTab === 'project') {
                 target = '#project-prompt-list-container';
                 url = '/prompts/new?type=project';
-            } else {
-                addLog('Cannot create new Template App prompts from UI.', 'yellow');
-                return;
             }
 
             if (document.getElementById('prompt-form-container')) {
@@ -380,21 +364,6 @@
             filesCount = 0;
             document.getElementById('files-count').textContent = filesCount;
             addLog('Context files cleared', 'blue');
-        }
-
-        function updateMetrics() {
-            document.getElementById('input-tokens').textContent = sessionTokensInput.toLocaleString();
-            document.getElementById('output-tokens').textContent = sessionTokensOutput.toLocaleString();
-            document.getElementById('cached-tokens').textContent = cachedTokens.toLocaleString();
-            document.getElementById('message-count').textContent = messageCount;
-            document.getElementById('session-cost').textContent = '$' + sessionCost.toFixed(4);
-
-            const contextUsed = sessionTokensInput + sessionTokensOutput;
-            const contextLimit = 200000;
-            const percentage = Math.min((contextUsed / contextLimit) * 100, 100);
-
-            document.getElementById('context-used').textContent = (contextUsed / 1000).toFixed(1) + 'K';
-            document.getElementById('context-bar').style.width = percentage + '%';
         }
 
         function handleKeydown(event) {
